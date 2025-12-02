@@ -1,52 +1,46 @@
-# Retail Sales SQL - Day 3
+# Retail Sales Analysis - SQL Day 3
 
-**Project:** Retail Superstore Dataset Analysis  
-**Day:** 3  
-**Tools:** Python, pandas, SQLite  
+این پروژه ادامه EDA فروشگاه خرده‌فروشی است و بر روی تحلیل داده‌ها با SQL در پایتون تمرکز دارد.
 
-## Overview
-In this project, we practice **SQL queries** on the Retail Superstore dataset using Python and SQLite.  
-Key goals:
-- Load dataset into SQLite in-memory database
-- Calculate KPIs using SQL
-- Practice GROUP BY, SUM, COUNT, RANK, JOIN queries
-- Extract top customers and top products
+## هدف پروژه
+- کار با SQLite و Pandas
+- اجرای کوئری‌های SQL روی داده‌های واقعی فروشگاه
+- محاسبه KPIهای مشتری، محصول و دسته‌بندی
+- آماده‌سازی پروژه برای رزومه و گیت
 
-## Folder Structure
+## فایل‌ها
+    - `data/raw_superstore.csv`: داده‌های خام فروشگاه
+    - `notebooks/03_retail_sales_sql.py`: کد اصلی تحلیل و SQL
+
+
 retail-sales-sql-day3/
-├── data/
-│ └── raw_superstore.csv
-├── notebooks/
-│ └── 03_retail_sales_sql.py
-├── README.md
+│
+├─ data/
+│   └─ raw_superstore.csv
+│
+├─ notebooks/
+│   └─ 03_retail_sales_sql.py
+│
+└─ README.md
 
 
-## How to Run
-1. Ensure Python 3.x is installed.
-2. Install dependencies:
-    ```bash
-    pip install pandas
+## ابزارها
+- Python 3.12
+- Pandas
+- SQLite3
+- Matplotlib و Seaborn (برای نمودارها)
 
-3. Run the script:
+## نحوه اجرا
+1. مطمئن شوید که فایل CSV در مسیر `data/` قرار دارد.
+2. اجرای فایل پایتون:
+    bash
     python notebooks/03_retail_sales_sql.py
+3. نتایج در ترمینال نمایش داده می‌شود و خروجی‌ها به صورت CSV یا نمودار ذخیره خواهند شد.
 
+خروجی‌ها
 
+خلاصه مشتریان (Total Orders و Total Sales)
 
-# Retail Sales SQL Analysis - Day 3
+محصولات پرفروش
 
-**هدف پروژه:**  
-تمرین SQL روی دیتاست Retail Superstore با استفاده از SQLite و Python.
-
-**فایل‌ها:**
-- `03_retail_sql_analysis.py` : فایل اصلی با کوئری‌های SQL
-- `data/raw_superstore.csv` : دیتاست فروش
-- `retail_superstore.db` : دیتابیس SQLite ساخته شده توسط اسکریپت
-
-**مباحث آموزش داده شده:**
-- بارگذاری داده با pandas
-- ایجاد دیتابیس SQLite
-- نوشتن کوئری‌های SQL:
-  - GROUP BY
-  - COUNT, SUM
-  - RANK() OVER
-  - JOIN
+KPIهای منطقه‌ای

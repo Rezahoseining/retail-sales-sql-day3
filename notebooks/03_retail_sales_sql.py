@@ -1,92 +1,62 @@
+import os
 import pandas as pd
 import sqlite3
-import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# -----------------------------------------------------------
-# 1. Load Data
-# -----------------------------------------------------------
+# --- مسیر فایل CSV ---
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_path = os.path.join(BASE_DIR, "data", "raw_superstore.csv")
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-csv_path = os.path.join(BASE_DIR, "..", "data", "raw_superstore.csv")
-
+print(f"[INFO] Loading data from: {csv_path}")
 df = pd.read_csv(csv_path, encoding="latin1")
 print("[INFO] Data Loaded Successfully!")
-print(df.head(), "\n")
+print(df.head())
 
-# -----------------------------------------------------------
-# 2. Create SQLite DB and Write Data
-# -----------------------------------------------------------
+# --- اتصال به SQLite ---
+db_path = os.path.join(BASE_DIR, "data", "retail_sales.db")
 
-db_path = os.path.join(BASE_DIR, "..", "data", "superstore.db")
-conn = sqlite3.connect(db_path)
+try:
+    with sqlite3.connect(db_path) as conn:
+        df.to_sql("Orders", conn, if_exists="replace", index=False)
+        print("[INFO] Data Written to SQLite Successfully!")
 
-df.to_sql("Orders", conn, if_exists="replace", index=False)
-print("[INFO] Data Written to SQLite Successfully!")
+        # --- بررسی ستون‌ها ---
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(Orders);")
+        for col in cursor.fetchall():
+            print(col)
 
-# Optional: Check table structure
-cursor = conn.cursor()
-cursor.execute("PRAGMA table_info(Orders);")
-print("\n[INFO] SQLite Table Structure:")
-for row in cursor.fetchall():
-    print(row)
+        # --- Query 1: خلاصه مشتری ---
+        query1 = """
+        SELECT [Customer ID] AS CustomerID, COUNT([Order ID]) AS TotalOrders, SUM(Sales) AS TotalSales
+        FROM Orders
+        GROUP BY [Customer ID]
+        ORDER BY TotalSales DESC
+        LIMIT 10;
+        """
+        customer_summary = pd.read_sql(query1, conn)
+        print("\n[INFO] Top 10 Customers:\n", customer_summary)
 
-# -----------------------------------------------------------
-# 3. SQL Queries
-# -----------------------------------------------------------
+        # --- Query 2: محصولات پرفروش ---
+        query2 = """
+        SELECT [Product Name] AS ProductName, SUM(Sales) AS TotalSales
+        FROM Orders
+        GROUP BY [Product Name]
+        ORDER BY TotalSales DESC
+        LIMIT 10;
+        """
+        product_summary = pd.read_sql(query2, conn)
+        print("\n[INFO] Top 10 Products:\n", product_summary)
 
-# ------------------------------
-# Query 1: Top 10 Customers
-# ------------------------------
-query1 = """
-SELECT 
-    [Customer ID] AS CustomerID,
-    COUNT([Order ID]) AS TotalOrders,
-    SUM(Sales) AS TotalSales
-FROM Orders
-GROUP BY [Customer ID]
-ORDER BY TotalSales DESC
-LIMIT 10;
-"""
+        # --- Query 3: KPI منطقه‌ای ---
+        query3 = """
+        SELECT Region, SUM(Sales) AS TotalSales, SUM(Profit) AS TotalProfit
+        FROM Orders
+        GROUP BY Region;
+        """
+        region_kpi = pd.read_sql(query3, conn)
+        print("\n[INFO] Region KPIs:\n", region_kpi)
 
-customer_summary = pd.read_sql(query1, conn)
-print("\n[Top Customers]")
-print(customer_summary)
-
-# ------------------------------
-# Query 2: Top 10 Products by Sales
-# ------------------------------
-query2 = """
-SELECT 
-    [Product Name] AS ProductName,
-    SUM(Sales) AS TotalSales
-FROM Orders
-GROUP BY [Product Name]
-ORDER BY TotalSales DESC
-LIMIT 10;
-"""
-
-product_summary = pd.read_sql(query2, conn)
-print("\n[Top Products]")
-print(product_summary)
-
-# ------------------------------
-# Query 3: Profit by Category
-# ------------------------------
-query3 = """
-SELECT 
-    Category,
-    SUM(Profit) AS TotalProfit
-FROM Orders
-GROUP BY Category
-ORDER BY TotalProfit DESC;
-"""
-
-category_profit = pd.read_sql(query3, conn)
-print("\n[Profit by Category]")
-print(category_profit)
-
-# -----------------------------------------------------------
-# 4. Close Connection
-# -----------------------------------------------------------
-conn.close()
-print("\n[INFO] SQLite Connection Closed Successfully!")
+except sqlite3.Error as e:
+    print("[ERROR] SQLite error:", e)
